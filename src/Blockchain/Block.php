@@ -203,9 +203,11 @@ class Block {
     }
     
     private function adjustDifficulty(Block $lastBlock) {
-        // + 10000 = 1s
-        $mine_rate = 10000 / 2; //500ms
+        // 10000 = 1s
+        $mine_rate = 5 * 10000; //5s
         
-        $this->difficulty = ($lastBlock->timestamp  * 10000) + $mine_rate > ($this->timestamp  * 10000) ? $lastBlock->difficulty + 1 : $lastBlock->difficulty - 1;
+        $difficulty = ($lastBlock->timestamp  * 10000) + $mine_rate > ($this->timestamp  * 10000) ? $lastBlock->difficulty + 1 : $lastBlock->difficulty - 1;
+        
+        $this->difficulty = $difficulty < 2 ? 2 :$difficulty;
     }
 }

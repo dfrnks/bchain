@@ -42,7 +42,13 @@ class App {
         
         $rota = $this->routes[$_SERVER["REQUEST_METHOD"]][$_SERVER["REQUEST_URI"]];
         
-        $data = $rota();
+        try {
+            $data = $rota();
+        } catch (\Exception $exception) {
+            header("Content-Type: application/json");
+            http_response_code(500);
+            exit(json_encode([ "code" => $exception->getCode() ? : 500, "message" => $exception->getMessage() ]));
+        }
         
         if(is_array($data) || is_object($data)) {
             header("Content-Type: application:json");
