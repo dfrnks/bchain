@@ -13,9 +13,9 @@ class BlockTest extends TestCase {
         
         $dataBlock = $block1->getBlock();
         
-        $this->assertEquals(["foo" => "bar"], $dataBlock["Data"]);
-        $this->assertEquals("--", $dataBlock["Last_Hash"]);
-        $this->assertEquals(3, $dataBlock["Difficulty"]);
+        $this->assertEquals(["foo" => "bar"], $dataBlock["data"]);
+        $this->assertEquals("--", $dataBlock["lastHash"]);
+        $this->assertEquals(3, $dataBlock["difficulty"]);
         
         $this->assertTrue($block1->isValid());
     

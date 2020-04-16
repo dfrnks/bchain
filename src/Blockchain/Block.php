@@ -35,8 +35,17 @@ class Block {
      */
     private $difficulty = 3;
     
-    public function __construct(array $data) {
-        $this->data = $data;
+    public function __construct(array $data, $load = false) {
+        if ($load) {
+            $this->setTimestamp($data["timestamp"]);
+            $this->setLastHash($data["lastHash"]);
+            $this->setHash($data["hash"]);
+            $this->setNonce($data["nonce"]);
+            $this->setDifficulty($data["difficulty"]);
+            $this->setData($data["data"]);
+        } else {
+            $this->setData($data);
+        }
     }
     
     /**
@@ -143,13 +152,13 @@ class Block {
     
     public function getBlock() : array {
         return [
-            "Timestamp"  => $this->getTimestamp(),
-            "Date"       => date("c", $this->getTimestamp()),
-            "Last_Hash"  => $this->getLastHash(),
-            "Hash"       => $this->getHash(),
-            "Nonce"      => $this->getNonce(),
-            "Difficulty" => $this->getDifficulty(),
-            "Data"       => $this->getData()
+            "timestamp"  => $this->getTimestamp(),
+            "date"       => date("c", $this->getTimestamp()),
+            "lastHash"   => $this->getLastHash(),
+            "hash"       => $this->getHash(),
+            "nonce"      => $this->getNonce(),
+            "difficulty" => $this->getDifficulty(),
+            "data"       => $this->getData()
         ];
     }
     
@@ -181,7 +190,7 @@ class Block {
         return  microtime(true);
     }
     
-    private function hash() {
+    public function hash() {
         $data = [
             "Timestamp"  => $this->getTimestamp(),
             "Data"       => $this->getData(),
