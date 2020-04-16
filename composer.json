@@ -1,0 +1,22 @@
+{
+    "name": "dfrnks/bchain",
+    "description": "PHP BlockChain and cryptocurrency",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "dfrnks",
+            "email": "douglasfrancardoso@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Bchain\\": "src"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^8"
+    }
+}
