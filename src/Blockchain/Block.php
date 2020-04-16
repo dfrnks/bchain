@@ -6,7 +6,7 @@ namespace Bchain\Blockchain;
 
 class Block {
     /**
-     * @var string
+     * @var int
      */
     private $timestamp;
 
@@ -31,14 +31,12 @@ class Block {
     private $nonce;
 
     /**
-     * @var string
+     * @var int
      */
-    private $difficulty;
-
-    public function __construct() {
-        $mc = explode(" ", microtime())[0];
-        
-        $this->setTimestamp(time() . "." . explode('.', $mc)[1]);
+    private $difficulty = 3;
+    
+    public function __construct(array $data) {
+        $this->data = $data;
     }
     
     /**
@@ -62,7 +60,7 @@ class Block {
      * @return string
      */
     public function getLastHash(): string {
-        return $this->lastHash;
+        return $this->lastHash ? : '--';
     }
     
     /**
@@ -134,10 +132,10 @@ class Block {
     }
     
     /**
-     * @param string $difficulty
+     * @param int $difficulty
      * @return Block
      */
-    public function setDifficulty(string $difficulty): Block {
+    public function setDifficulty(int $difficulty): Block {
         $this->difficulty = $difficulty;
         
         return $this;
@@ -145,7 +143,7 @@ class Block {
     
     public function getBlock() : array {
         return [
-            "timestamp"  => $this->getTimestamp(),
+            "Timestamp"  => $this->getTimestamp(),
             "Date"       => date("c", $this->getTimestamp()),
             "Last_Hash"  => $this->getLastHash(),
             "Hash"       => $this->getHash(),
@@ -153,5 +151,52 @@ class Block {
             "Difficulty" => $this->getDifficulty(),
             "Data"       => $this->getData()
         ];
+    }
+    
+    public function mineBlock(Block $lastBlock = null) {
+        $this->nonce = -1;
+        
+        do {
+            $this->nonce++;
+            // Verifica a dificuldade para aumentar ou diminuir
+            
+            $this->timestamp = $this->now();
+            
+            if ($lastBlock) {
+                $this->setLastHash($lastBlock->getHash());
+                $this->adjustDifficulty($lastBlock);
+            }
+            
+            $this->hash = $this->hash();
+        } while (!$this->isValid());
+        
+        return $this->getBlock();
+    }
+    
+    public function isValid() {
+        return substr($this->hash, $this->difficulty, $this->difficulty) === str_repeat('0', $this->difficulty);
+    }
+    
+    private function now() {
+        return  microtime(true);
+    }
+    
+    private function hash() {
+        $data = [
+            "Timestamp"  => $this->getTimestamp(),
+            "Data"       => $this->getData(),
+            "Last_Hash"  => $this->getLastHash(),
+            "Nonce"      => $this->getNonce(),
+            "Difficulty" => $this->getDifficulty(),
+        ];
+    
+        return hash("sha256", json_encode($data));
+    }
+    
+    private function adjustDifficulty(Block $lastBlock) {
+        // + 10000 = 1s
+        $mine_rate = 10000 / 2; //500ms
+        
+        $this->difficulty = ($lastBlock->timestamp  * 10000) + $mine_rate > ($this->timestamp  * 10000) ? $lastBlock->difficulty + 1 : $lastBlock->difficulty - 1;
     }
 }
