@@ -11,10 +11,11 @@ class Blockchain {
      */
     private $chain = [];
     
+    private $file = __DIR__ . "/../../chain/blockchain.json";
+    
     public function __construct() {
-        $newChain = false;
-        if(file_exists("blockchain.json")) {
-            $newChain = !$this->replaceChain(json_decode(file_get_contents("blockchain.json"), true));
+        if(file_exists($this->file)) {
+            $newChain = !$this->replaceChain(json_decode(file_get_contents($this->file), true));
         } else {
             $newChain = true;
         }
@@ -61,7 +62,7 @@ class Blockchain {
             $this->chain = $chain;
         }
         
-        file_put_contents("blockchain.json", json_encode($this->chain, JSON_PRETTY_PRINT));
+        file_put_contents($this->file, json_encode($this->chain, JSON_PRETTY_PRINT));
         
         return $this;
     }

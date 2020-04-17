@@ -30,32 +30,55 @@ class App {
         return  $this;
     }
     
-    public function run() {
-        $method = $_SERVER["REQUEST_METHOD"];
-        $uri = $_SERVER["REQUEST_URI"];
-        
+    public function exec($method, $uri, $body) : array {
         if (!key_exists($method, $this->routes) || !key_exists($uri, $this->routes[$method])) {
-            header("Content-Type: application/json");
-            http_response_code(404);
-            exit(json_encode([ "code" => 404, "message" => "Page not found" ]));
+            return [
+                404,
+                [
+                    "Content-Type" => "application/json"
+                ],
+                json_encode([ "code" => 404, "message" => "Page not found" ])
+            ];
         }
         
-        $rota = $this->routes[$_SERVER["REQUEST_METHOD"]][$_SERVER["REQUEST_URI"]];
+        $rota = $this->routes[$method][$uri];
         
         try {
-            $data = $rota();
+            $data = $rota($body);
         } catch (\Exception $exception) {
-            header("Content-Type: application/json");
-            http_response_code(500);
-            exit(json_encode([ "code" => $exception->getCode() ? : 500, "message" => $exception->getMessage() ]));
+            return [
+                500,
+                [
+                    "Content-Type" => "application/json"
+                ],
+                json_encode([ "code" => $exception->getCode() ? : 500, "message" => $exception->getMessage() ])
+            ];
         }
         
         if(is_array($data) || is_object($data)) {
-            header("Content-Type: application:json");
-            
-            exit(json_encode($data));
+            return [
+                200,
+                [
+                    "Content-Type" => "application/json"
+                ],
+                json_encode($data)
+            ];
+        }
+    
+        return [ 200, [], $data ];
+    }
+    
+    public function run() {
+        $data = json_decode(file_get_contents("php://input"), true) ? : $_POST;
+        
+        [$status, $header, $body] = $this->exec($_SERVER["REQUEST_METHOD"], $_SERVER["REQUEST_URI"], $data);
+        
+        http_response_code($status);
+        
+        foreach ($header as $key => $item) {
+            header("{$key}: {$item}");
         }
         
-        exit($data);
+        echo $body;
     }
 }

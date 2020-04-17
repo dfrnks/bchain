@@ -1,4 +1,4 @@
 /vendor/
 .idea
 .phpunit.result.cache
-public/blockchain.json
+chain/blockchain.json
