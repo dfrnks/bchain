@@ -6,10 +6,6 @@ use Bchain\Blockchain\Blockchain;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-if ($GLOBALS["node"] !== $GLOBALS["node_principal"]) {
-
-}
-
 $app = new App();
 $blockchain = new Blockchain();
 
@@ -37,6 +33,8 @@ $app->put("/node", function ($data) use ($blockchain) {
     return $blockchain->getNodes();
 });
 
-$app->get("/resolve", function () use ($blockchain) {
-
+$app->get("/sync", function () use ($blockchain) {
+    $blockchain->sync($GLOBALS["node_principal"]);
+    
+    return $blockchain->getChain();
 });

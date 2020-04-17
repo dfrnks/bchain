@@ -29,15 +29,22 @@ class Blockchain {
         
         if ($newChain){
             $genesis = new Block(["info" => "No princípio criou Deus o céu e a terra. Gênesis 1:1"]);
+            $genesis->setTimestamp('1587150686.2415');
             $this->addBlock($genesis);
         }
         
         if ($GLOBALS["node"] !== $GLOBALS["node_principal"]) {
             $this->loadNodesNetwork($GLOBALS["node_principal"]);
+    
+            foreach ($this->getNodes() as $item) {
+                $this->sync($item);
+            }
         }
     }
     
     public function loadNodesNetwork($node) {
+        $this->setNode($node);
+        
         // Diz para o node principal que esta on
         $curl = curl_init();
     
@@ -60,7 +67,7 @@ class Blockchain {
     
         curl_close($curl);
     
-        $nodes = json_decode($nodes, true);
+        $nodes = json_decode($nodes, true) ? : [];
     
         foreach ($nodes as $item) {
             if ($this->setNode($item)) {
@@ -139,6 +146,35 @@ class Blockchain {
         }
         
         return false;
+    }
+    
+    public function sync($node) {
+        // Diz para o node principal que esta on
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => $node . "/chain",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => "",
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => "GET",
+            CURLOPT_HTTPHEADER     => [
+                "Content-Type: application/json"
+            ],
+        ]);
+    
+        $bc = curl_exec($curl);
+    
+        curl_close($curl);
+    
+        $bc = json_decode($bc, true);
+        
+        $this->replaceChain($bc);
+        
+        return true;
     }
     
     public function replaceChain($chain) {

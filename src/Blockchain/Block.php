@@ -169,9 +169,8 @@ class Block {
             $this->nonce++;
             // Verifica a dificuldade para aumentar ou diminuir
             
-            $this->timestamp = $this->now();
-            
             if ($lastBlock) {
+                $this->timestamp = $this->now();
                 $this->setLastHash($lastBlock->getHash());
                 $this->adjustDifficulty($lastBlock);
             }

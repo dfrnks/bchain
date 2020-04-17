@@ -16,7 +16,7 @@ require_once __DIR__ . '/bootstrap.php';
 $http_worker = new Worker("http://" . $GLOBALS["node"]);
 
 // 4 processes
-$http_worker->count = 4;
+$http_worker->count = 1;
 
 // Emitted when data received
 $http_worker->onMessage = function (ConnectionInterface $connection, Request $request) use ($app) {
