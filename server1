@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 use Workerman\Connection\ConnectionInterface;
@@ -5,10 +6,14 @@ use Workerman\Protocols\Http\Request;
 use Workerman\Protocols\Http\Response;
 use Workerman\Worker;
 
+$GLOBALS["server"] = $argv[0];
+$GLOBALS["node"] = '127.0.0.1:8001';
+$GLOBALS["node_principal"] = '127.0.0.1:8000';
+
 require_once __DIR__ . '/bootstrap.php';
 
 // #### http worker ####
-$http_worker = new Worker('http://127.0.0.1:8000');
+$http_worker = new Worker("http://" . $GLOBALS["node"]);
 
 // 4 processes
 $http_worker->count = 4;
@@ -16,7 +21,7 @@ $http_worker->count = 4;
 // Emitted when data received
 $http_worker->onMessage = function (ConnectionInterface $connection, Request $request) use ($app) {
     [$status, $header, $body] = $app->exec($request->method(), $request->uri(), (json_decode($request->rawBody(), true) ? : $request->post()));
-    
+
     $connection->send(new Response($status, $header, $body));
 };
 

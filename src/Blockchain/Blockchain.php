@@ -11,11 +11,18 @@ class Blockchain {
      */
     private $chain = [];
     
-    private $file = __DIR__ . "/../../chain/blockchain.json";
+    private $nodes = [];
+    
+    private $bc_file;
+    
+    private $nd_file;
     
     public function __construct() {
-        if(file_exists($this->file)) {
-            $newChain = !$this->replaceChain(json_decode(file_get_contents($this->file), true));
+        $this->bc_file = __DIR__ . "/../../chain/blockchain." . $GLOBALS["server"] . ".json";
+        $this->nd_file = __DIR__ . "/../../chain/nodes." . $GLOBALS["server"] . ".json";
+        
+        if(file_exists($this->bc_file)) {
+            $newChain = !$this->replaceChain(json_decode(file_get_contents($this->bc_file), true));
         } else {
             $newChain = true;
         }
@@ -24,9 +31,43 @@ class Blockchain {
             $genesis = new Block(["info" => "No princípio criou Deus o céu e a terra. Gênesis 1:1"]);
             $this->addBlock($genesis);
         }
-    
+        
+        if ($GLOBALS["node"] !== $GLOBALS["node_principal"]) {
+            $this->loadNodesNetwork($GLOBALS["node_principal"]);
+        }
     }
     
+    public function loadNodesNetwork($node) {
+        // Diz para o node principal que esta on
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => $node . "/node",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => "",
+            CURLOPT_MAXREDIRS      => 10,
+            CURLOPT_TIMEOUT        => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => "PUT",
+            CURLOPT_POSTFIELDS     => json_encode(["address" => $GLOBALS["node"]]),
+            CURLOPT_HTTPHEADER     => [
+                "Content-Type: application/json"
+            ],
+        ]);
+    
+        $nodes = curl_exec($curl);
+    
+        curl_close($curl);
+    
+        $nodes = json_decode($nodes, true);
+    
+        foreach ($nodes as $item) {
+            if ($this->setNode($item)) {
+                $this->loadNodesNetwork($item);
+            }
+        }
+    }
     /**
      * @param Block $block
      * @return Blockchain
@@ -62,9 +103,42 @@ class Blockchain {
             $this->chain = $chain;
         }
         
-        file_put_contents($this->file, json_encode($this->chain, JSON_PRETTY_PRINT));
+        file_put_contents($this->bc_file, json_encode($this->chain, JSON_PRETTY_PRINT));
         
         return $this;
+    }
+    
+    /**
+     * @return array
+     */
+    public function getNodes(): array {
+        if(file_exists($this->nd_file)) {
+            $this->nodes = json_decode(file_get_contents($this->nd_file), true);
+        }
+        
+        return array_values($this->nodes);
+    }
+    
+    /**
+     * @param string $node
+     * @return bool
+     */
+    public function setNode(string $node): bool {
+        if(file_exists($this->nd_file)) {
+            $this->nodes = json_decode(file_get_contents($this->nd_file), true);
+        }
+
+        if ($node && !array_key_exists($node, $this->nodes) && $node != $GLOBALS["node"]) {
+            $this->nodes[$node] = $node;
+            
+            ksort($this->nodes);
+    
+            file_put_contents($this->nd_file, json_encode($this->nodes, JSON_PRETTY_PRINT));
+            
+            return true;
+        }
+        
+        return false;
     }
     
     public function replaceChain($chain) {
