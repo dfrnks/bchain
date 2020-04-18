@@ -109,6 +109,8 @@ class Blockchain {
         
         $this->setChain();
         
+        $this->sendAllNodes();
+        
         return $this;
     }
     
@@ -176,6 +178,37 @@ class Blockchain {
         file_put_contents($this->nd_file, json_encode($this->nodes, JSON_PRETTY_PRINT));
     
         return true;
+    }
+    
+    public function sendAllNodes() {
+        foreach ($this->getNodes() as $node) {
+            $curl = curl_init();
+    
+            curl_setopt_array($curl, [
+                CURLOPT_URL            => $node . "/chain",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING       => "",
+                CURLOPT_MAXREDIRS      => 10,
+                CURLOPT_TIMEOUT        => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST  => "POST",
+                CURLOPT_POSTFIELDS     => json_encode(["chain" => $this->chain]),
+                CURLOPT_HTTPHEADER     => [
+                    "Content-Type: application/json"
+                ],
+            ]);
+    
+            $bc = curl_exec($curl);
+            
+            var_dump($bc);
+    
+            curl_close($curl);
+    
+            $bc = json_decode($bc, true) ? : [];
+    
+            $this->replaceChain($bc);
+        }
     }
     
     public function sync($node) {

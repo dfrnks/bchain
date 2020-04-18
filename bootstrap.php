@@ -13,6 +13,16 @@ $app->get("/chain", function () use ($blockchain) {
     return $blockchain->getChain();
 });
 
+$app->post("/chain", function ($data) use ($blockchain) {
+    if (!is_array($data["chain"])) {
+        throw new Exception("Informe o body corretamente");
+    }
+    
+    $blockchain->replaceChain($data["chain"]);
+    
+    return $blockchain->getChain();
+});
+
 $app->put("/block", function ($data) use ($blockchain) {
     if (!is_array($data["data"])) {
         throw new Exception("Informe o body corretamente");
