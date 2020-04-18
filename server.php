@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 use Workerman\Connection\ConnectionInterface;
@@ -7,11 +6,11 @@ use Workerman\Protocols\Http\Response;
 use Workerman\Worker;
 
 $GLOBALS["server"] = $argv[0];
-$GLOBALS["node"] = '127.0.0.1:8000';
-$GLOBALS["node_principal"] = '127.0.0.1:8000';
+$GLOBALS["node"] = isset($argv[2]) ? $argv[2] : '127.0.0.1:8000';
+$GLOBALS["node_principal"] =  isset($argv[3]) ? $argv[3] : '127.0.0.1:8000';
 
 require_once __DIR__ . '/bootstrap.php';
-
+echo "\n\n";
 // #### http worker ####
 $http_worker = new Worker("http://" . $GLOBALS["node"]);
 

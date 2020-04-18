@@ -7,7 +7,7 @@ use Bchain\Blockchain\Blockchain;
 require_once __DIR__ . '/vendor/autoload.php';
 
 $app = new App();
-$blockchain = new Blockchain();
+$blockchain = new Blockchain($GLOBALS["node"], $GLOBALS["node_principal"]);
 
 $app->get("/chain", function () use ($blockchain) {
     return $blockchain->getChain();
