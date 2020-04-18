@@ -7,10 +7,10 @@ use Workerman\Worker;
 
 $GLOBALS["server"] = $argv[0];
 $GLOBALS["node"] = isset($argv[2]) ? $argv[2] : '127.0.0.1:8000';
-$GLOBALS["node_principal"] =  isset($argv[3]) ? $argv[3] : '127.0.0.1:8000';
+$GLOBALS["node_principal"] =  isset($argv[3]) ? $argv[3] : '127.0.0.1:8001';
 
 require_once __DIR__ . '/bootstrap.php';
-echo "\n\n";
+echo "\n";
 // #### http worker ####
 $http_worker = new Worker("http://" . $GLOBALS["node"]);
 

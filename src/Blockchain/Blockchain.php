@@ -25,7 +25,7 @@ class Blockchain {
         $this->bc_file = __DIR__ . "/../../chain/blockchain." . $node . ".json";
         $this->nd_file = __DIR__ . "/../../chain/nodes." . $node . ".json";
     
-//        file_put_contents($this->nd_file, json_encode([], JSON_PRETTY_PRINT));
+        file_put_contents($this->nd_file, json_encode([], JSON_PRETTY_PRINT));
         
         if(file_exists($this->bc_file)) {
             $newChain = !$this->replaceChain(json_decode(file_get_contents($this->bc_file), true));
@@ -49,8 +49,6 @@ class Blockchain {
     }
     
     public function loadNodesNetwork($node) {
-        $this->setNode($node);
-        
         // Diz para o node principal que esta on
         $curl = curl_init();
     
@@ -78,8 +76,8 @@ class Blockchain {
         if (empty($nodes)) {
             return false;
         }
-        
-        echo "Conectado no node {$node}\n";
+    
+        $this->setNode($node);
     
         foreach ($nodes as $item) {
             if ($this->setNode($item)) {
@@ -157,6 +155,8 @@ class Blockchain {
             ksort($this->nodes);
     
             file_put_contents($this->nd_file, json_encode($this->nodes, JSON_PRETTY_PRINT));
+    
+            echo "-- Conectado no node {$node} --\n";
             
             return true;
         }
